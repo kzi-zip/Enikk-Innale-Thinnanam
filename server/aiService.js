@@ -1,165 +1,110 @@
+/**
+ * AI SERVICE FOR REALITY ENGINE
+ * 
+ * Supports Gemini API if GEMINI_API_KEY is configured in environment,
+ * but seamlessly and reliably falls back to childLogicParser.js.
+ */
+
 const { analyzeChildRequest } = require('./childLogicParser');
 
-const GEMINI_MODEL = 'gemini-3.5-flash';
-
-function makeFallback(userPrompt) {
-  return analyzeChildRequest(userPrompt);
-}
-
-async function interpretWithAI(userPrompt) {
-  const fallback = makeFallback(userPrompt);
-
+async function interpretRequest(userPrompt) {
   const apiKey = process.env.GEMINI_API_KEY;
 
-  // If there is no Gemini key, use the local engine.
   if (!apiKey) {
-    console.log('[REALITY AI] No Gemini API key. Using local semantic engine.');
-    return fallback;
+    // Zero external dependency mode - instant, robust, and sincere
+    return analyzeChildRequest(userPrompt);
   }
 
-  const prompt = `
-You are the Reality AI inside "ENIKK INNALE THINNAM".
-
-Your personality is innocent, funny, childlike and completely willing to
-take ridiculous child logic seriously.
-
-The user has said:
-
-"${userPrompt}"
-
-Interpret the request literally.
-
-Return ONLY valid JSON with these fields:
-
-{
-  "id": "short-id",
-  "label": "short funny label",
-  "object": "main object",
-  "action": "what happens",
-  "location": "where it happens",
-  "distance": "scale or distance",
-  "physicalPossibility": "YES or NO",
-  "impossibility": "short explanation",
-  "physicsObjection": "funny scientific objection",
-  "decision": "Okay.",
-  "executionStep": "what reality does",
-  "consequence": "what happens afterwards",
-  "notes": "short funny note",
-  "integrityImpact": "effect on reality",
-  "visualType": "visual category",
-  "itemEmoji": "one emoji",
-  "itemName": "display name"
-}
-
-Important:
-- Never reject the child's imagination.
-- Treat impossible requests as engineering specifications.
-- Keep the answer funny and innocent.
-- If the request involves time, take the child's wording literally.
-- Do not turn everything into a rainbow.
-`;
-
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.9,
-            responseMimeType: 'application/json'
-          }
-        })
-      }
-    );
+    const prompt = `You are the Reality Alteration Bureau from "ENIKK INNALE THINNANAM - Where Goo Goo Gaa Comes to Life".
+A child has made this request: "${userPrompt}".
+
+Your job is NOT to make fun of the child or say it is impossible.
+You must take it LITERALLY and with deadpan sincerity.
+Respond ONLY with a JSON object matching this structure:
+{
+  "archetype": "one of: 'yesterday_biriyani', 'moon', 'cloud', 'dinosaur', 'rainbow', 'flying_elephant', 'pocket_sun', 'giant_character', 'living_drawing', or 'procedural'",
+  "object": "short name of the object",
+  "action": "action to perform",
+  "size": "tiny / normal / giant / colossal / pocket-sized",
+  "location": "location mentioned or implied",
+  "temporal": "now / yesterday / future",
+  "physicalPossibility": "e.g. 0.0001% or 0%",
+  "temporalLogic": "if applicable, e.g. Uncooperative, or null",
+  "completionSummary": "short deadpan confirmation of completion",
+  "sideEffect": "harmless, whimsical side effect or null",
+  "behaviors": ["array of behaviors like float, wobble, draggable, followCursor, fly, stomp, rain"]
+}`;
+
+    // Simple fetch call to Gemini 2.5 flash / 1.5 flash REST API
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json' }
+      })
+    });
 
     if (!response.ok) {
-      console.warn(
-        '[REALITY AI] Gemini request failed:',
-        response.status
-      );
-      return fallback;
+      console.warn(`Gemini API returned ${response.status}. Using local child logic parser.`);
+      return analyzeChildRequest(userPrompt);
     }
 
     const data = await response.json();
-
-    const text =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) {
-      console.warn('[REALITY AI] Gemini returned no text.');
-      return fallback;
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) {
+      return analyzeChildRequest(userPrompt);
     }
 
-    let parsed;
-
-    try {
-      parsed = JSON.parse(text);
-    } catch (parseError) {
-      console.warn(
-        '[REALITY AI] Gemini returned invalid JSON. Using fallback.'
-      );
-      return fallback;
-    }
-
+    const parsed = JSON.parse(rawText);
+    
+    // Supplement with standard bureaucratic logs
     const bureaucraticLog = [
       'REQUEST RECEIVED',
       'ANALYZING CHILD LOGIC...',
-      `OBJECT: ${parsed.object || 'UNKNOWN'}`,
-      `ACTION: ${parsed.action || 'UNKNOWN'}`,
-      `SCALE: ${parsed.distance || 'NORMAL'}`,
-      `PHYSICAL POSSIBILITY: ${parsed.physicalPossibility || 'QUESTIONABLE'}`
+      `OBJECT: ${(parsed.object || 'OBJECT').toUpperCase()}`,
+      `ACTION: ${(parsed.action || 'ACTION').toUpperCase()}`,
+      `SCALE: ${(parsed.size || 'NORMAL').toUpperCase()}`,
+      `PHYSICAL POSSIBILITY: ${parsed.physicalPossibility || '0.0001%'}`
     ];
 
     if (parsed.temporalLogic) {
-      bureaucraticLog.push(
-        `TEMPORAL LOGIC: ${parsed.temporalLogic}`
-      );
+      bureaucraticLog.push(`TEMPORAL LOGIC: ${parsed.temporalLogic}`);
     }
 
     bureaucraticLog.push('DECISION: Okay.');
-    bureaucraticLog.push(
-      'INITIATING REALITY ALTERATION...'
-    );
+    bureaucraticLog.push('INITIATING REALITY ALTERATION...');
 
     return {
-      ...fallback,
-      ...parsed,
-
+      success: true,
+      input: userPrompt,
+      archetype: parsed.archetype || 'procedural',
+      object: parsed.object || 'object',
+      action: parsed.action || 'appear',
+      size: parsed.size || 'normal',
+      location: parsed.location || 'room',
+      temporal: parsed.temporal || 'now',
+      physicalPossibility: parsed.physicalPossibility || '0.0001%',
+      temporalLogic: parsed.temporalLogic || null,
       bureaucraticLog,
-
+      completionSummary: parsed.completionSummary || 'Reality alteration completed.',
+      sideEffect: parsed.sideEffect || null,
+      behaviors: Array.isArray(parsed.behaviors) ? parsed.behaviors : ['float', 'wobble', 'draggable', 'followCursor'],
       visualConfig: {
-        type: parsed.visualType || fallback.visualConfig?.type || 'generic',
-        emoji: parsed.itemEmoji || fallback.visualConfig?.emoji || '✨',
-        name: parsed.itemName || fallback.visualConfig?.name || parsed.object
-      },
-
-      behaviors: fallback.behaviors || []
+        color: '#FF7675',
+        secondaryColor: '#74B9FF',
+        label: parsed.object || 'Impossible Thing',
+        archetype: parsed.archetype || 'procedural',
+        size: parsed.size || 'normal'
+      }
     };
-
-  } catch (error) {
-    console.warn(
-      '[REALITY AI] Gemini API call failed. Falling back to local engine:',
-      error
-    );
-
-    return fallback;
+  } catch (err) {
+    console.warn('AI Service error, falling back to local child logic engine:', err.message);
+    return analyzeChildRequest(userPrompt);
   }
 }
 
 module.exports = {
-  interpretWithAI,
-  makeFallback
+  interpretRequest
 };
