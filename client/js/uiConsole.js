@@ -127,40 +127,6 @@ class UIConsole {
     });
 }
 
-        const line = logLines[lineIdx];
-        const lineEl = document.createElement('div');
-        
-        if (line.includes('DECISION: Okay.')) {
-          lineEl.className = 'line-highlight';
-        } else if (line.includes('PHYSICAL POSSIBILITY') || line.includes('TEMPORAL LOGIC')) {
-          lineEl.className = 'line-warning';
-        }
-
-        this.terminal.appendChild(lineEl);
-        window.soundEngine.playBureauType();
-
-        // Type line characters
-        let charIdx = 0;
-        const typeChar = () => {
-          if (charIdx < line.length) {
-            lineEl.textContent += line[charIdx];
-            charIdx++;
-            setTimeout(typeChar, 12);
-          } else {
-            lineIdx++;
-            const pct = Math.round((lineIdx / totalLines) * 90);
-            this.progressFill.style.width = `${pct}%`;
-            setTimeout(printNextLine, 140);
-          }
-        };
-
-        typeChar();
-      };
-
-      printNextLine();
-    });
-  }
-
   // Show Harmless Side Effect Toast
   showSideEffectToast(summary, sideEffect) {
     if (!this.toast) return;
