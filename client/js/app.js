@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const uiConsole = new UIConsole();
   const drawingEngine = new DrawingEngine('drawing-pad', realityEngine, uiConsole);
 
+window.addEventListener('error', (e) => {
+  console.error('APP ERROR:', e.error || e.message);
+});
   // 2. DOM Elements
   const form = document.getElementById('reality-form');
   const input = document.getElementById('reality-input');
