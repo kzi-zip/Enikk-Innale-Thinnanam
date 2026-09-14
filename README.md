@@ -1,4 +1,5 @@
-<img width="1280" height="640" alt="git (1)" src="https://github.com/user-attachments/assets/8920b256-2ba8-4988-b824-5351134eb4bd" />
+<img width="1576" height="762" alt="Cover (2)" src="https://github.com/user-attachments/assets/f30082c4-a37a-4f74-9507-53dc5c9c4a48" />
+
 
 
 
@@ -308,22 +309,18 @@ http://localhost:3000
 ### Project Documentation
 For Software:
 
-# Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+# Screenshots
+<img width="1585" height="776" alt="Capture 1" src="https://github.com/user-attachments/assets/fc67671a-a861-4a2d-a0a1-9ef61bb80f9e" />
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
+Reality engine working.
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+<img width="1579" height="773" alt="Capture 3" src="https://github.com/user-attachments/assets/4022246e-70a8-4c66-a687-47a7cba43f7e" />
 
+More of webage.
 
-![Build](Add photos of build process here)
-*Explain the build steps*
+<img width="1587" height="776" alt="Capture 4" src="https://github.com/user-attachments/assets/ac6590a1-33f7-4bfa-a1fa-160158c97547" />
 
-![Final](Add photo of final product here)
-*Explain the final build*
+About page.
 
 
 ---
