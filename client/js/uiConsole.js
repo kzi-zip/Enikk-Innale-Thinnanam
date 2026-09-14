@@ -1,3 +1,9 @@
+/**
+ * SERIOUS REALITY ALTERATION BUREAU & TOAST CONTROLLER
+ * 
+ * Manages the deadpan typewriter sequence and harmless side effect notifications.
+ */
+
 class UIConsole {
   constructor() {
     this.modal = document.getElementById('bureau-modal');
@@ -7,6 +13,7 @@ class UIConsole {
     this.caseIdEl = document.getElementById('case-file-id');
     this.statusText = document.getElementById('bureau-status-text');
 
+    // Toast elements
     this.toast = document.getElementById('side-effect-banner');
     this.toastSummary = document.getElementById('toast-summary');
     this.toastSideEffect = document.getElementById('toast-side-effect');
@@ -24,6 +31,7 @@ class UIConsole {
     }
   }
 
+  // Play the serious bureaucratic reality alteration sequence
   async playBureauSequence(logLines) {
     return new Promise(resolve => {
       this.modal.classList.add('open');
@@ -31,67 +39,45 @@ class UIConsole {
       this.progressFill.style.width = '0%';
       this.stampArea.classList.remove('stamped');
       this.statusText.textContent = 'ANALYZING CHILD LOGIC...';
-
+      
       const caseNumber = Math.floor(1000 + Math.random() * 9000);
       this.caseIdEl.textContent = `CASE #${caseNumber}-OK`;
-
-      if (!Array.isArray(logLines) || logLines.length === 0) {
-        logLines = [
-          '[REALITY BUREAU] Child logic detected.',
-          '[REALITY BUREAU] Physical possibility: questionable.',
-          '[REALITY BUREAU] Temporal logic: questionable.',
-          '[REALITY BUREAU] DECISION: Okay.'
-        ];
-      }
 
       let lineIdx = 0;
       const totalLines = logLines.length;
 
-      const finish = () => {
-        this.progressFill.style.width = '100%';
-        this.statusText.textContent =
-          'DECISION FINALIZED: REALITY COMMITTED.';
-
-        setTimeout(() => {
-          this.stampArea.classList.add('stamped');
-
-          if (window.soundEngine?.playStamp) {
-            window.soundEngine.playStamp();
-          }
-
-          setTimeout(() => {
-            this.modal.classList.remove('open');
-            resolve();
-          }, 600);
-        }, 350);
-      };
-
       const printNextLine = () => {
         if (lineIdx >= totalLines) {
-          finish();
+          // Finished all lines, trigger stamp and close
+          this.progressFill.style.width = '100%';
+          this.statusText.textContent = 'DECISION FINALIZED: REALITY COMMITTED.';
+          
+          setTimeout(() => {
+            this.stampArea.classList.add('stamped');
+            window.soundEngine.playStamp();
+
+            setTimeout(() => {
+              this.modal.classList.remove('open');
+              resolve();
+            }, 600);
+          }, 350);
           return;
         }
 
-        const line = String(logLines[lineIdx] ?? '');
+        const line = logLines[lineIdx];
         const lineEl = document.createElement('div');
-
+        
         if (line.includes('DECISION: Okay.')) {
           lineEl.className = 'line-highlight';
-        } else if (
-          line.includes('PHYSICAL POSSIBILITY') ||
-          line.includes('TEMPORAL LOGIC')
-        ) {
+        } else if (line.includes('PHYSICAL POSSIBILITY') || line.includes('TEMPORAL LOGIC')) {
           lineEl.className = 'line-warning';
         }
 
         this.terminal.appendChild(lineEl);
+        window.soundEngine.playBureauType();
 
-        if (window.soundEngine?.playBureauType) {
-          window.soundEngine.playBureauType();
-        }
-
+        // Type line characters
         let charIdx = 0;
-
         const typeChar = () => {
           if (charIdx < line.length) {
             lineEl.textContent += line[charIdx];
@@ -99,11 +85,7 @@ class UIConsole {
             setTimeout(typeChar, 12);
           } else {
             lineIdx++;
-
-            const pct = Math.round(
-              (lineIdx / totalLines) * 90
-            );
-
+            const pct = Math.round((lineIdx / totalLines) * 90);
             this.progressFill.style.width = `${pct}%`;
             setTimeout(printNextLine, 140);
           }
@@ -116,12 +98,11 @@ class UIConsole {
     });
   }
 
+  // Show Harmless Side Effect Toast
   showSideEffectToast(summary, sideEffect) {
     if (!this.toast) return;
 
-    this.toastSummary.textContent =
-      summary || 'Reality alteration completed.';
-
+    this.toastSummary.textContent = summary || 'Reality alteration completed.';
     if (sideEffect) {
       this.toastSideEffect.style.display = 'block';
       this.toastSideText.textContent = sideEffect;
@@ -131,10 +112,8 @@ class UIConsole {
 
     this.toast.classList.add('show');
 
-    if (this.toastTimeout) {
-      clearTimeout(this.toastTimeout);
-    }
-
+    // Auto-dismiss after 7 seconds
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
     this.toastTimeout = setTimeout(() => {
       this.hideSideEffectToast();
     }, 7000);
