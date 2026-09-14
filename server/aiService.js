@@ -54,7 +54,7 @@ Instead, interpret the child's request literally and describe how
 the simulator should bend reality to make it happen.
 
 Examples:
-"I want to eat yesterday's biriyani"
+"I want to eat biryani yesterday"
 "I want to eat the moon"
 "I want my pillow to become a dinosaur"
 "I want it to rain cookies"
