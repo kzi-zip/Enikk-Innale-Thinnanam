@@ -34,35 +34,98 @@ class UIConsole {
   // Play the serious bureaucratic reality alteration sequence
   async playBureauSequence(logLines) {
     return new Promise(resolve => {
-      this.modal.classList.add('open');
-      this.terminal.innerHTML = '';
-      this.progressFill.style.width = '0%';
-      this.stampArea.classList.remove('stamped');
-      this.statusText.textContent = 'ANALYZING CHILD LOGIC...';
-      
-      const caseNumber = Math.floor(1000 + Math.random() * 9000);
-      this.caseIdEl.textContent = `CASE #${caseNumber}-OK`;
+        this.modal.classList.add('open');
+        this.terminal.innerHTML = '';
+        this.progressFill.style.width = '0%';
+        this.stampArea.classList.remove('stamped');
+        this.statusText.textContent = 'ANALYZING CHILD LOGIC...';
 
-      let lineIdx = 0;
-      const totalLines = logLines.length;
+        const caseNumber = Math.floor(1000 + Math.random() * 9000);
+        this.caseIdEl.textContent = `CASE #${caseNumber}-OK`;
 
-      const printNextLine = () => {
-        if (lineIdx >= totalLines) {
-          // Finished all lines, trigger stamp and close
-          this.progressFill.style.width = '100%';
-          this.statusText.textContent = 'DECISION FINALIZED: REALITY COMMITTED.';
-          
-          setTimeout(() => {
-            this.stampArea.classList.add('stamped');
-            window.soundEngine.playStamp();
+        // Make sure the log is always usable
+        if (!Array.isArray(logLines) || logLines.length === 0) {
+            logLines = [
+                '[REALITY BUREAU] Child logic detected.',
+                '[REALITY BUREAU] Physical possibility: questionable.',
+                '[REALITY BUREAU] Temporal logic: questionable.',
+                '[REALITY BUREAU] DECISION: Okay.'
+            ];
+        }
+
+        let lineIdx = 0;
+        const totalLines = logLines.length;
+
+        const finish = () => {
+            this.progressFill.style.width = '100%';
+            this.statusText.textContent =
+                'DECISION FINALIZED: REALITY COMMITTED.';
 
             setTimeout(() => {
-              this.modal.classList.remove('open');
-              resolve();
-            }, 600);
-          }, 350);
-          return;
-        }
+                this.stampArea.classList.add('stamped');
+
+                if (window.soundEngine?.playStamp) {
+                    window.soundEngine.playStamp();
+                }
+
+                setTimeout(() => {
+                    this.modal.classList.remove('open');
+                    resolve();
+                }, 600);
+            }, 350);
+        };
+
+        const printNextLine = () => {
+            if (lineIdx >= totalLines) {
+                finish();
+                return;
+            }
+
+            const line = String(logLines[lineIdx] ?? '');
+
+            const lineEl = document.createElement('div');
+
+            if (line.includes('DECISION: Okay.')) {
+                lineEl.className = 'line-highlight';
+            } else if (
+                line.includes('PHYSICAL POSSIBILITY') ||
+                line.includes('TEMPORAL LOGIC')
+            ) {
+                lineEl.className = 'line-warning';
+            }
+
+            this.terminal.appendChild(lineEl);
+
+            if (window.soundEngine?.playBureauType) {
+                window.soundEngine.playBureauType();
+            }
+
+            let charIdx = 0;
+
+            const typeChar = () => {
+                if (charIdx < line.length) {
+                    lineEl.textContent += line[charIdx];
+                    charIdx++;
+                    setTimeout(typeChar, 12);
+                } else {
+                    lineIdx++;
+
+                    const pct = Math.round(
+                        (lineIdx / totalLines) * 90
+                    );
+
+                    this.progressFill.style.width = `${pct}%`;
+
+                    setTimeout(printNextLine, 140);
+                }
+            };
+
+            typeChar();
+        };
+
+        printNextLine();
+    });
+}
 
         const line = logLines[lineIdx];
         const lineEl = document.createElement('div');
