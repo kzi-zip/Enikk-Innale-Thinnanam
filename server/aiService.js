@@ -37,14 +37,27 @@ Respond ONLY with a JSON object matching this structure:
 }`;
 
     // Simple fetch call to Gemini 2.5 flash / 1.5 flash REST API
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json' }
-      })
-    });
+    const controller = new AbortController();
+const timeout = setTimeout(() => controller.abort(), 10000);
+
+let response;
+
+try {
+  response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: systemPrompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.7
+      }
+    }),
+    signal: controller.signal
+  });
+} finally {
+  clearTimeout(timeout);
+}
 
     if (!response.ok) {
       console.warn(`Gemini API returned ${response.status}. Using local child logic parser.`);
