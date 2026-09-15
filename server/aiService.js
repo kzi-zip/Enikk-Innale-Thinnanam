@@ -1,6 +1,6 @@
 /**
  * AI SERVICE FOR REALITY ENGINE
- * 
+ *
  * Supports Gemini API if GEMINI_API_KEY is configured in environment,
  * but seamlessly and reliably falls back to childLogicParser.js.
  */
@@ -10,18 +10,24 @@ const { analyzeChildRequest } = require('./childLogicParser');
 async function interpretRequest(userPrompt) {
   const apiKey = process.env.GEMINI_API_KEY;
 
+  // No API key → use local child logic parser
   if (!apiKey) {
-    // Zero external dependency mode - instant, robust, and sincere
     return analyzeChildRequest(userPrompt);
   }
 
-  try {
-    const prompt = `You are the Reality Alteration Bureau from "ENIKK INNALE THINNANAM - Where Goo Goo Gaa Comes to Life".
+  const url =
+    `https://generativelanguage.googleapis.com/v1beta/models/` +
+    `gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+  const systemPrompt = `You are the Reality Alteration Bureau from "ENIKK INNALE THINNANAM - Where Goo Goo Gaa Comes to Life".
+
 A child has made this request: "${userPrompt}".
 
 Your job is NOT to make fun of the child or say it is impossible.
 You must take it LITERALLY and with deadpan sincerity.
+
 Respond ONLY with a JSON object matching this structure:
+
 {
   "archetype": "one of: 'yesterday_biriyani', 'moon', 'cloud', 'dinosaur', 'rainbow', 'flying_elephant', 'pocket_sun', 'giant_character', 'living_drawing', or 'procedural'",
   "object": "short name of the object",
@@ -36,42 +42,75 @@ Respond ONLY with a JSON object matching this structure:
   "behaviors": ["array of behaviors like float, wobble, draggable, followCursor, fly, stomp, rain"]
 }`;
 
-    // Simple fetch call to Gemini 2.5 flash / 1.5 flash REST API
+  try {
     const controller = new AbortController();
-const timeout = setTimeout(() => controller.abort(), 10000);
 
-let response;
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 10000);
 
-try {
-  response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: systemPrompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.7
-      }
-    }),
-    signal: controller.signal
-  });
-} finally {
-  clearTimeout(timeout);
-}
+    let response;
+
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: systemPrompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.7
+          }
+        }),
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
-      console.warn(`Gemini API returned ${response.status}. Using local child logic parser.`);
+      console.warn(
+        `Gemini API returned ${response.status}. Using local child logic parser.`
+      );
+
       return analyzeChildRequest(userPrompt);
     }
 
     const data = await response.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    const rawText =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
     if (!rawText) {
+      console.warn(
+        'Gemini returned no usable content. Using local child logic parser.'
+      );
+
       return analyzeChildRequest(userPrompt);
     }
 
-    const parsed = JSON.parse(rawText);
-    
+    let parsed;
+
+    try {
+      parsed = JSON.parse(rawText);
+    } catch (parseError) {
+      console.warn(
+        'Gemini returned invalid JSON. Using local child logic parser.'
+      );
+
+      return analyzeChildRequest(userPrompt);
+    }
+
     // Supplement with standard bureaucratic logs
     const bureaucraticLog = [
       'REQUEST RECEIVED',
@@ -83,27 +122,52 @@ try {
     ];
 
     if (parsed.temporalLogic) {
-      bureaucraticLog.push(`TEMPORAL LOGIC: ${parsed.temporalLogic}`);
+      bureaucraticLog.push(
+        `TEMPORAL LOGIC: ${parsed.temporalLogic}`
+      );
     }
 
     bureaucraticLog.push('DECISION: Okay.');
-    bureaucraticLog.push('INITIATING REALITY ALTERATION...');
+    bureaucraticLog.push(
+      'INITIATING REALITY ALTERATION...'
+    );
 
     return {
       success: true,
       input: userPrompt,
+
       archetype: parsed.archetype || 'procedural',
       object: parsed.object || 'object',
       action: parsed.action || 'appear',
       size: parsed.size || 'normal',
       location: parsed.location || 'room',
       temporal: parsed.temporal || 'now',
-      physicalPossibility: parsed.physicalPossibility || '0.0001%',
-      temporalLogic: parsed.temporalLogic || null,
+
+      physicalPossibility:
+        parsed.physicalPossibility || '0.0001%',
+
+      temporalLogic:
+        parsed.temporalLogic || null,
+
       bureaucraticLog,
-      completionSummary: parsed.completionSummary || 'Reality alteration completed.',
-      sideEffect: parsed.sideEffect || null,
-      behaviors: Array.isArray(parsed.behaviors) ? parsed.behaviors : ['float', 'wobble', 'draggable', 'followCursor'],
+
+      completionSummary:
+        parsed.completionSummary ||
+        'Reality alteration completed.',
+
+      sideEffect:
+        parsed.sideEffect || null,
+
+      behaviors:
+        Array.isArray(parsed.behaviors)
+          ? parsed.behaviors
+          : [
+              'float',
+              'wobble',
+              'draggable',
+              'followCursor'
+            ],
+
       visualConfig: {
         color: '#FF7675',
         secondaryColor: '#74B9FF',
@@ -113,7 +177,11 @@ try {
       }
     };
   } catch (err) {
-    console.warn('AI Service error, falling back to local child logic engine:', err.message);
+    console.warn(
+      'AI Service error, falling back to local child logic engine:',
+      err.message
+    );
+
     return analyzeChildRequest(userPrompt);
   }
 }
