@@ -289,13 +289,7 @@ function analyzeChildRequest(inputText) {
   // O. Universal Arbitrary Child Logic Parser
   else {
     const words = text.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(Boolean);
-    const stopWords = new Set([
-    'i', 'want', 'a', 'an', 'the', 'to', 'be', 'in', 'my', 'on', 'me',
-    'please', 'make', 'give', 'can', 'have', 'and', 'with', 'it',
-    'of', 'lots', 'lot', 'some', 'many', 'much', 'very', 'really',
-    'is', 'are', 'was', 'were', 'do', 'does', 'did', 'for', 'from',
-    'into', 'onto', 'at', 'by', 'that', 'this', 'something'
-]);
+    const stopWords = new Set(['i', 'want', 'a', 'an', 'the', 'to', 'be', 'in', 'my', 'on', 'me', 'please', 'make', 'give', 'can', 'have', 'and', 'with', 'it']);
 
     actor = meaningful[0] || 'imagined_hero';
     target = meaningful[1] || 'impossible_wonder';
