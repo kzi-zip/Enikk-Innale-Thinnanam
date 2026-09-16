@@ -1014,29 +1014,192 @@ const VisualRenderers = {
     }
   },
 
-  // 15. RICH PROCEDURAL ENTITY SYNTHESIZER
+    // RICH PROCEDURAL ENTITY SYNTHESIZER
+  // Creates a cute, varied childlike creature instead of a generic square.
   procedural(ctx, e) {
     const w = e.width * 0.45;
     const h = e.height * 0.45;
+    const t = e.floatTimer || 0;
+
+    const label = String(e.label || 'Magic Thing').toLowerCase();
+
+    // Pick a simple visual identity from the AI's description.
+    const isAnimal =
+      /cat|dog|puppy|kitten|elephant|penguin|bird|fish|frog|rabbit|bunny|dinosaur|bear|monkey|tiger|lion|cow|horse|chicken/.test(label);
+
+    const isFood =
+      /pizza|cake|ice.?cream|burger|biriyani|rice|cookie|apple|banana|cake|food|chocolate/.test(label);
+
+    const isVehicle =
+      /car|bike|bicycle|bus|train|rocket|airplane|plane|ship|boat/.test(label);
+
+    const isPlanet =
+      /moon|planet|star|sun|earth|space/.test(label);
+
+    const bounce = Math.sin(t * 2) * 5;
 
     ctx.save();
+    ctx.translate(0, bounce);
+
     ctx.fillStyle = e.color || '#FF7675';
     ctx.strokeStyle = '#2C3437';
     ctx.lineWidth = 3.5;
 
-    ctx.beginPath();
-    ctx.roundRect(-w, -h, w * 2, h * 2, 22);
-    ctx.fill();
-    ctx.stroke();
+    // -------------------------
+    // ANIMAL
+    // -------------------------
+    if (isAnimal) {
+      // Body
+      ctx.beginPath();
+      ctx.ellipse(0, h * 0.12, w * 0.62, h * 0.62, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
 
-    // Belly
-    ctx.fillStyle = e.secondaryColor || '#FAB1A0';
-    ctx.beginPath();
-    ctx.ellipse(0, h * 0.25, w * 0.65, h * 0.5, 0, 0, Math.PI * 2);
-    ctx.fill();
+      // Ears
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.42, -h * 0.28);
+      ctx.lineTo(-w * 0.7, -h * 0.75);
+      ctx.lineTo(-w * 0.15, -h * 0.48);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
 
-    // Face
-    VisualRenderers._drawCuteFace(ctx, 0, -h * 0.15, 11, e.blinkTimer);
+      ctx.beginPath();
+      ctx.moveTo(w * 0.42, -h * 0.28);
+      ctx.lineTo(w * 0.7, -h * 0.75);
+      ctx.lineTo(w * 0.15, -h * 0.48);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Belly
+      ctx.fillStyle = e.secondaryColor || '#FAB1A0';
+      ctx.beginPath();
+      ctx.ellipse(0, h * 0.28, w * 0.4, h * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      VisualRenderers._drawCuteFace(ctx, 0, -h * 0.08, 11, e.blinkTimer);
+    }
+
+    // -------------------------
+    // FOOD
+    // -------------------------
+    else if (isFood) {
+      ctx.beginPath();
+      ctx.ellipse(0, h * 0.05, w * 0.75, h * 0.48, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Food topping/details
+      ctx.fillStyle = e.secondaryColor || '#FFD166';
+
+      for (let i = 0; i < 7; i++) {
+        const x = (i - 3) * w * 0.18;
+        const y = Math.sin(i * 2.1) * h * 0.18;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 6 + (i % 3), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      VisualRenderers._drawCuteFace(ctx, 0, 0, 11, e.blinkTimer);
+    }
+
+    // -------------------------
+    // VEHICLE
+    // -------------------------
+    else if (isVehicle) {
+      // Main body
+      ctx.fillStyle = e.color || '#FF7675';
+      ctx.beginPath();
+      ctx.roundRect(-w * 0.8, -h * 0.15, w * 1.6, h * 0.65, 18);
+      ctx.fill();
+      ctx.stroke();
+
+      // Roof
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.45, -h * 0.15);
+      ctx.lineTo(-w * 0.25, -h * 0.5);
+      ctx.lineTo(w * 0.35, -h * 0.5);
+      ctx.lineTo(w * 0.55, -h * 0.15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Wheels
+      ctx.fillStyle = '#20242A';
+
+      [-w * 0.5, w * 0.5].forEach(x => {
+        ctx.beginPath();
+        ctx.arc(x, h * 0.48, 16, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Face on vehicle
+      VisualRenderers._drawCuteFace(ctx, 0, h * 0.02, 9, e.blinkTimer);
+    }
+
+    // -------------------------
+    // PLANET / SPACE OBJECT
+    // -------------------------
+    else if (isPlanet) {
+      const r = Math.min(w, h) * 0.75;
+
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Craters
+      ctx.fillStyle = e.secondaryColor || '#FAB1A0';
+
+      [
+        [-r * 0.4, -r * 0.25, 10],
+        [r * 0.35, -r * 0.35, 7],
+        [-r * 0.2, r * 0.35, 8],
+        [r * 0.4, r * 0.3, 6]
+      ].forEach(([x, y, size]) => {
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      VisualRenderers._drawCuteFace(ctx, 0, 0, 11, e.blinkTimer);
+    }
+
+    // -------------------------
+    // UNKNOWN / MAGIC THING
+    // -------------------------
+    else {
+      // Soft blob rather than a square
+      ctx.beginPath();
+
+      const points = 12;
+      for (let i = 0; i <= points; i++) {
+        const a = (i / points) * Math.PI * 2;
+        const r =
+          Math.min(w, h) *
+          (0.72 + Math.sin(a * 3 + t) * 0.08);
+
+        const x = Math.cos(a) * r;
+        const y = Math.sin(a) * r;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = e.secondaryColor || '#FAB1A0';
+
+      ctx.beginPath();
+      ctx.ellipse(0, h * 0.22, w * 0.5, h * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      VisualRenderers._drawCuteFace(ctx, 0, -h * 0.08, 11, e.blinkTimer);
+    }
 
     // Label
     ctx.fillStyle = '#FFFFFF';
@@ -1044,11 +1207,14 @@ const VisualRenderers = {
     ctx.lineWidth = 2.5;
     ctx.font = 'bold 13px "Rubik", sans-serif';
     ctx.textAlign = 'center';
-    ctx.strokeText(e.label || 'Magic Thing', 0, h + 20);
-    ctx.fillText(e.label || 'Magic Thing', 0, h + 20);
+
+    const displayLabel = e.label || 'Magic Thing';
+
+    ctx.strokeText(displayLabel, 0, h + 28);
+    ctx.fillText(displayLabel, 0, h + 28);
+
     ctx.restore();
   },
-
   _drawCuteFace(ctx, x, y, size = 10, blinkTimer = 0) {
     const isBlinking = (blinkTimer % 4.0) > 3.85;
 
