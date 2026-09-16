@@ -27,7 +27,6 @@ function analyzeChildRequest(inputText) {
   let archetype = 'procedural';
   let primaryColor = '#FF5964';
   let secondaryColor = '#35A7FF';
-
   // -------------------------------------------------------------
   // 1. SEMANTIC DECOMPOSITION & SCENARIO BLUEPRINTS
   // -------------------------------------------------------------
@@ -324,10 +323,7 @@ const meaningful = words.filter(w => !stopWords.has(w.toLowerCase()));
       'Reality has accepted this without further questions.'
     ];
     sideEffect = sideEffectsPool[Math.floor(Math.random() * sideEffectsPool.length)];
-        // Keep arbitrary requests on the procedural renderer,
-    // but preserve the actual child-logic description for the renderer.
-    archetype = 'procedural';
-    target = meaningful.slice(0, 4).join('_') || 'impossible_wonder';
+          archetype = 'procedural';
   }
 
   // -------------------------------------------------------------
