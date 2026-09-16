@@ -292,9 +292,16 @@ else {
 const stopWords = new Set(['i', 'want', 'a', 'an', 'the', 'to', 'be', 'in', 'my', 'on', 'me', 'please', 'make', 'give', 'can', 'have', 'and', 'with', 'it']);
 
 const meaningful = words.filter(w => !stopWords.has(w.toLowerCase()));
-    actor = meaningful[0] || 'imagined_hero';
-    target = meaningful[1] || 'impossible_wonder';
-    action = 'manifest_marvel';
+
+if (meaningful.length === 1) {
+  actor = 'child';
+  target = meaningful[0];
+  action = 'manifest_marvel';
+} else {
+  actor = meaningful[0] || 'imagined_hero';
+  target = meaningful[1] || 'impossible_wonder';
+  action = 'manifest_marvel';
+}
     scale = lower.includes('giant') ? 'colossal' : (lower.includes('tiny') ? 'pocket-sized' : 'normal');
     emotion = 'audacious_creative';
 
