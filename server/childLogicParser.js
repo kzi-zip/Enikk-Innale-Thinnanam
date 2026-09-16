@@ -286,7 +286,8 @@ function analyzeChildRequest(inputText) {
     secondaryColor = '#2980B9';
   }
   // O. Universal Arbitrary Child Logic Parser
-const words = text.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+else {
+  const words = text.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(Boolean);
 
 const stopWords = new Set(['i', 'want', 'a', 'an', 'the', 'to', 'be', 'in', 'my', 'on', 'me', 'please', 'make', 'give', 'can', 'have', 'and', 'with', 'it']);
 
