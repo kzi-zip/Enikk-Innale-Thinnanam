@@ -9,7 +9,8 @@ const { analyzeChildRequest } = require('./childLogicParser');
 
 async function interpretRequest(userPrompt) {
   const apiKey = process.env.GEMINI_API_KEY;
-
+  console.log("AI REQUEST RECEIVED:", userPrompt);
+ 
   // No API key → use local child logic parser
   if (!apiKey) {
     return analyzeChildRequest(userPrompt);
@@ -43,12 +44,14 @@ Respond ONLY with a JSON object matching this structure:
 }`;
 
   try {
-    const controller = new AbortController();
+  console.log("STARTING GEMINI REQUEST...");
 
-    const timeout = setTimeout(() => {
-      controller.abort();
-    }, 10000);
+  const controller = new AbortController();
 
+  const timeout = setTimeout(() => {
+    console.log("GEMINI REQUEST TIMED OUT");
+    controller.abort();
+  }, 10000);
     let response;
 
     try {
@@ -74,6 +77,8 @@ Respond ONLY with a JSON object matching this structure:
         }),
         signal: controller.signal
       });
+
+    console.log("GEMINI RESPONSE RECEIVED:", response.status);
     } finally {
       clearTimeout(timeout);
     }
