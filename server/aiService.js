@@ -16,8 +16,8 @@ async function interpretRequest(userPrompt) {
   }
 
   const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/` +
-    `gemini-1.5-flash:generateContent?key=${apiKey}`;
+  `https://generativelanguage.googleapis.com/v1beta/models/` +
+  `gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
 
   const systemPrompt = `You are the Reality Alteration Bureau from "ENIKK INNALE THINNANAM - Where Goo Goo Gaa Comes to Life".
 
